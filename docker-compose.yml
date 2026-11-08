@@ -1,0 +1,59 @@
+services:
+  weaviate:
+    image: semitechnologies/weaviate:1.32.4
+    container_name: vectorbench-weaviate
+    restart: unless-stopped
+    ports:
+      - "8081:8080"
+      - "50051:50051"
+    environment:
+      QUERY_DEFAULTS_LIMIT: 25
+      AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: "true"
+      PERSISTENCE_DATA_PATH: "/var/lib/weaviate"
+      DEFAULT_VECTORIZER_MODULE: "none"
+      ENABLE_API_BASED_MODULES: "false"
+      CLUSTER_HOSTNAME: "node1"
+    volumes:
+      - weaviate_data:/var/lib/weaviate
+
+  pgvector:
+    image: pgvector/pgvector:0.8.7-pg16-bookworm
+    container_name: vectorbench-pgvector
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: vectorbench
+      POSTGRES_PASSWORD: vectorbench_dev_2026
+      POSTGRES_DB: vectorbench_vectors
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgvector_data:/var/lib/postgresql/data
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: vectorbench-qdrant
+    restart: unless-stopped
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+
+  postgres:
+    image: postgres:16
+    container_name: vectorbench-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: vectorbench
+      POSTGRES_PASSWORD: vectorbench_dev_2026
+      POSTGRES_DB: vectorbench
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  qdrant_data:
+  postgres_data:
+  weaviate_data:
+  pgvector_data:
